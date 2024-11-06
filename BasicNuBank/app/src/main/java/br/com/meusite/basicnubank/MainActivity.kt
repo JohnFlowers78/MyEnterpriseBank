@@ -46,7 +46,7 @@ fun NuBankApp() {
         composable("principal") { MainScreen(navController) }
         composable("depositar") { DepositarScreen(navController) }
         composable("transferir") { TransferirScreen(navController) }
-        composable("extratoList") { ExtratoListScreen() }
+        composable("extratoList") { ExtratoListScreen(navController) }
         composable("caixinhasList") { CaixinhasGridScreen(navController) }
         composable("addCaixinha") { AddCaixinhaScreen(navController) }
         composable("detalhesCaixinha/{caixinhaId}") { backStackEntry ->

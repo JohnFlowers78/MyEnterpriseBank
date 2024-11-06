@@ -1,6 +1,7 @@
 package br.com.meusite.basicnubank.screen
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -16,33 +17,44 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LiveData
 import androidx.navigation.NavHostController
+import br.com.meusite.basicnubank.R
 import br.com.meusite.basicnubank.data.AppDatabase
 import br.com.meusite.basicnubank.data.caixinha.Caixinha
 
 @Composable
 fun CaixinhasGridScreen(navController: NavHostController) {
-
     val context = LocalContext.current
     val db = AppDatabase.getDatabase(context)
-
     val caixinhasLiveData: LiveData<List<Caixinha>> = db.caixinhaDao().listCaixinhas()
     val caixinhas by caixinhasLiveData.observeAsState(emptyList())
 
-    Box(modifier = Modifier.fillMaxSize()) {
+
+    val saldoTotal = caixinhas.sumOf { it.saldo }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 100.dp)
+    ) {
+        SaldoHeader(saldo = saldoTotal)
         CaixinhasGrid(caixinhas, navController)
+    }
 
-        // FloatingActionButton removed from this screen as per your specification
-        // If you wish to keep it for navigating to add screen, you can uncomment below
-
+    // FAB para adicionar Caixinha
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.BottomEnd
+    ) {
         FloatingActionButton(
             onClick = { navController.navigate("addCaixinha") },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
+            modifier = Modifier.padding(bottom = 80.dp)
         ) {
             Icon(
                 painter = painterResource(id = android.R.drawable.ic_input_add),
@@ -50,6 +62,31 @@ fun CaixinhasGridScreen(navController: NavHostController) {
                 tint = Color.White
             )
         }
+    }
+
+    // Botões de navegação no rodapé
+    FloatingButtons3(navController)
+}
+
+@Composable
+fun SaldoHeader(saldo: Double) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(125.dp)
+            .background(Color(0xFF673AB7))
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Text(
+            text = "Soma Total das Caixinhas\nR$ ${String.format("%.2f", saldo)}",
+            color = Color.White,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            lineHeight = 28.sp
+        )
     }
 }
 
@@ -66,7 +103,6 @@ fun CaixinhasGrid(caixinhas: List<Caixinha>, navController: NavHostController) {
             CaixinhaItem(
                 caixinha = caixinha,
                 onClick = {
-                    // Navigate to the details screen when clicked
                     navController.navigate("detalhesCaixinha/${caixinha.id}")
                 }
             )
@@ -84,7 +120,7 @@ fun CaixinhaItem(caixinha: Caixinha, onClick: () -> Unit) {
     horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(id = br.com.meusite.basicnubank.R.drawable.default_image),
+            painter = painterResource(id = R.drawable.default_image),                //  br.com.meusite.basicnubank.
             contentDescription = "img_caixinha",
             modifier = Modifier
                 .size(80.dp)
@@ -96,9 +132,51 @@ fun CaixinhaItem(caixinha: Caixinha, onClick: () -> Unit) {
             modifier = Modifier.width(100.dp)
         )
         Text(
-            text = "R$ ${caixinha.saldo}",      // Converte saldo para formato monetário
+            text = "R$ ${caixinha.saldo}",
             fontSize = 14.sp,
             modifier = Modifier.width(100.dp)
         )
+    }
+}
+
+@Composable
+fun FloatingButtons3(navController: NavHostController) {
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 60.dp)
+        ) {
+            FloatingActionButton(
+                onClick = {
+                    navController.navigate("principal")
+                },
+                modifier = Modifier.size(56.dp).padding(end = 0.dp),
+                containerColor = Color(0xFF9F30D5)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.icon_transacao),
+                    contentDescription = "Transações/Extrato",
+                    modifier = Modifier.size(24.dp),
+                    tint = Color.White,
+                )
+            }
+            FloatingActionButton(
+                onClick = {
+                    navController.navigate("caixinhasList")
+                },
+                modifier = Modifier.size(56.dp).padding(start = 0.dp),
+                containerColor = Color(0xFF9F30D5)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.icon_sifrao),
+                    contentDescription = "Caixinhas",
+                    modifier = Modifier.size(24.dp),
+                    tint = Color.White
+                )
+            }
+        }
     }
 }
